@@ -37,25 +37,25 @@ addpath(genpath(topdir));
 % Check if running on local machine for debugging or on SCC for processing
 if ispc
     %%% Local machine
-    dpath = 'C:\Users\mack\Documents\BU\Boas_Lab\psoct_human_brain_resources\test_data\Hui_Frangi_dataset\200218depthnorm\';
+    dpath = 'C:\Users\erinhana\Documents\MATLAB\skeleton3D\';
     % Subject IDs
-    subid = {'sub_00'};
-    subdir = '\dist_corrected\volume\';
+    %subid = {'sub_00'};
+    %subdir = '\dist_corrected\volume\';
     % Filename to parse (this is test data)
-    fname = 'volume_ori_inv_cropped';
+    fname = 'testvol_unsigned';
     % filename extension
-    ext = '.tif';
+    ext = '.mat';
 elseif isunix
     %%% Computing cluster (SCC)
     % Path to top-level directory
     dpath = '/projectnb/npbssmic/ns/Ann_Mckee_samples_10T/';
     % Subject IDs
-%     subid = {'AD_10382', 'AD_20832', 'AD_20969', 'AD_21354', 'AD_21424',...
-%              'CTE_6489', 'CTE_6912', 'CTE_7019', 'CTE_8572', 'CTE_7126',...
-%              'NC_21499', 'NC_6047', 'NC_6839', 'NC_6974', 'NC_7597',...
-%              'NC_8095', 'NC_8653'};
-    subid = {'AD_20969', 'AD_21354'};
-    subdir = '/dist_corrected/volume/';
+    subid = {'AD_10382_2P', 'AD_20832_2P', 'AD_20969_2P', 'AD_21354_2P', 'AD_21424_2P',...
+             'CTE_6489_2P', 'CTE_6912_2P', 'CTE_7019_2P', 'CTE_8572_2P', 'CTE_7126_2P',...
+             'NC_21499_2P', 'NC_6047_2P', 'NC_6839_2P', 'NC_6974_2P', 'NC_7597_2P',...
+             'NC_8095_2P', 'NC_8653_2P'};
+%     subid = {'AD_20969', 'AD_21354'};
+    subdir = '/aip/';
     % Filename to parse (this will be the same for each subject)
     fname = 'ref_4ds_norm';
     % filename extension
@@ -95,19 +95,19 @@ radii = 40;
 % Boolean for converting segment to graph (0 = don't convert, 1 = convert)
 graph_boolean = 1;
 
-for ii = 1:length(subid)
-    %% Segment the volume
+for ii = 1:length(dpath)
+    % Segment the volume
     % Define entire filepath 
-    fullpath = fullfile(dpath, subid{ii}, subdir);
+    fullpath = fullfile(dpath);
     filename = strcat(fullpath, strcat(fname, ext));
     % Convert .tif to .MAT
-    vol = TIFF2MAT(filename);
-    
+    vol = load(filename);
+    vol = vol.Unsigned;
     for j = 1:length(min_prob)
         [I_seg, fname_seg] = ...
             segment_main(vol, sigma, min_prob(j), min_conn, fullpath, fname);
         
-        %% Mask segmented volume (remove erroneous vessels) & Convert to Graph
+        % Mask segmented volume (remove erroneous vessels) & Convert to Graph
         % The function for creating the mask requires a radius. This for-loop will
         % iterate over an array of radii. For each radius, it will create a mask,
         % apply the mask to the segmentation volume, and save the output.
@@ -136,7 +136,7 @@ for ii = 1:length(subid)
         end
     end
 end
-toc
+%toc
 
 %% Initialization of vesGraphValidate
 function [graph_init] = initialize_graph(Graph)
